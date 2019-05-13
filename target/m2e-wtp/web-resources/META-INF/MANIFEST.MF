@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Implementation-Title: travelAssistant
 Implementation-Version: 0.0.1-SNAPSHOT
-Built-By: vera
+Built-By: I318683
 Implementation-Vendor-Id: travelAssistant
-Build-Jdk: 1.8.0_191
+Build-Jdk: 1.8.0_161
 Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
  ot-starter-parent/travelAssistant
 Created-By: Maven Integration for Eclipse
