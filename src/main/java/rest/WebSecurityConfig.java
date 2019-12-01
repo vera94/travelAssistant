@@ -16,7 +16,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	public static final String SIGN_UP_URL = "/user/sign-up";
+	public static final String SIGN_UP_URL = "/login";
 	 private UserDetailsServiceImpl userDetailsService;
 	    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -28,7 +28,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	    @Override
 	    protected void configure(HttpSecurity http) throws Exception {
 	        http.cors().and().csrf().disable().authorizeRequests()
-	                .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
+	                .antMatchers(HttpMethod.GET, SIGN_UP_URL, "/*").permitAll()
 	                .anyRequest().authenticated()
 	                .and()
 	                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
