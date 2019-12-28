@@ -25,8 +25,8 @@ public class UserController {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    @PostMapping("/sign-up")
-    public void signUp(@RequestBody UserEntity user) {
+    @PostMapping("/signup")
+    public void login(@RequestBody UserEntity user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }

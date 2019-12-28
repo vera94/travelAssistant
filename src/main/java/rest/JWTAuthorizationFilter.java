@@ -1,5 +1,9 @@
 package rest;
 
+import static model.EnpointConstants.HEADER_STRING;
+import static model.EnpointConstants.SECRET;
+import static model.EnpointConstants.TOKEN_PREFIX;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -17,11 +21,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
-	public static final String SECRET = "SecretKeyToGenJWTs";
-    public static final long EXPIRATION_TIME = 864_000_000; // 10 days
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_STRING = "Authorization";
-    public static final String SIGN_UP_URL = "/user/sign-up";
 
     public JWTAuthorizationFilter(AuthenticationManager authManager) {
         super(authManager);

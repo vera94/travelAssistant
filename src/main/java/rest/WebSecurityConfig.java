@@ -1,5 +1,10 @@
 package rest;
 
+import static model.EnpointConstants.REGISTRATION_URL;
+import static model.EnpointConstants.SIIN_UP_URL;
+
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,7 +21,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	public static final String SIGN_UP_URL = "/login";
 	 private UserDetailsServiceImpl userDetailsService;
 	    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -28,7 +32,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	    @Override
 	    protected void configure(HttpSecurity http) throws Exception {
 	        http.cors().and().csrf().disable().authorizeRequests()
-	                .antMatchers(HttpMethod.GET, SIGN_UP_URL, "/*").permitAll()
+	                .antMatchers(HttpMethod.POST, SIIN_UP_URL).permitAll()
+	                .antMatchers(HttpMethod.POST, REGISTRATION_URL).permitAll()
 	                .anyRequest().authenticated()
 	                .and()
 	                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
@@ -42,36 +47,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
 	    }
 
-	  @Bean
-	  CorsConfigurationSource corsConfigurationSource() {
-	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	    source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-	    return source;
-	  }
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//    	http
-//        .cors().disable()
-//        .authorizeRequests()
-//        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//        .anyRequest()
-//        .fullyAuthenticated()
-//        .and()
-//        .httpBasic()
-//        .and()
-//        .csrf().disable();
-//    }
-//
-//    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//             User.withDefaultPasswordEncoder()
-//                .username("user")
-//                .password("password")
-//                .roles("USER")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
+//	  @Bean
+//	  CorsConfigurationSource corsConfigurationSource() {
+//	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//	    source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+//	    return source;
+//	  }
+	    @Bean
+	    CorsConfigurationSource corsConfigurationSource() {
+	        CorsConfiguration configuration = new CorsConfiguration();
+	        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+	        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+	        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	        source.registerCorsConfiguration("/**", configuration);
+	        return source;
+	    }
 }

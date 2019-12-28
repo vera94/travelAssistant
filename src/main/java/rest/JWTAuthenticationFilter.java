@@ -1,6 +1,11 @@
 package rest;
 
 
+import static model.EnpointConstants.EXPIRATION_TIME;
+import static model.EnpointConstants.SECRET;
+import static model.EnpointConstants.HEADER_STRING;
+import static model.EnpointConstants.TOKEN_PREFIX;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,11 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.UserEntity;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-	public static final String SECRET = "SecretKeyToGenJWTs";
-    public static final long EXPIRATION_TIME = 864_000_000; // 10 days
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_STRING = "Authorization";
-    public static final String SIGN_UP_URL = "/user/sign-up";
     
     private AuthenticationManager authenticationManager;
 
@@ -65,5 +65,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(SECRET.getBytes()));
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+        res.addHeader("Access-Control-Expose-Headers", HEADER_STRING);
     }
 }
