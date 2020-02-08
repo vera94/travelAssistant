@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 import model.UserEntity;
 import repository.IUserRepository;
 
-import static java.util.Collections.emptyList;
-
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private IUserRepository userRepository;
@@ -24,6 +22,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (applicationUser == null) {
             throw new UsernameNotFoundException(username);
         }
-        return new User(applicationUser.getEmail(), applicationUser.getPassword(), emptyList());
+        return new User(applicationUser.getEmail(), applicationUser.getPassword(), applicationUser.getGrantedAuthoritiesList());
     }
 }

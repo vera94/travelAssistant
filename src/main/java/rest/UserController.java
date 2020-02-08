@@ -1,5 +1,7 @@
 package rest;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import model.Role;
 import model.UserEntity;
 import repository.IUserRepository;
 
@@ -28,13 +31,12 @@ public class UserController {
     @PostMapping("/signup")
     public void login(@RequestBody UserEntity user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        user.setGrantedAuthoritiesList(Arrays.asList(Role.USER));
         userRepository.save(user);
     }
     
-	@PostMapping(path="/add") // Map ONLY GET Requests
+	@PostMapping(path="/add") 
 	public @ResponseBody String addNewUser () {
-		// @ResponseBody means the returned String is the response, not a view name
-		// @RequestParam means it is a parameter from the GET or POST request
 
 		UserEntity n = new UserEntity();
 		n.setFirstName("vera");
