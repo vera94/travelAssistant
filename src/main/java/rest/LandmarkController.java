@@ -7,13 +7,17 @@ import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import model.Landmark;
 import repository.ILandmarkRepository;
@@ -36,10 +40,13 @@ public class LandmarkController {
 		}
 		return landmarkRepository.findById(landmarkId);
 	}
-	
+	@CrossOrigin(origins = "*")
 	@PostMapping()
-	public @ResponseBody Landmark addNew(@RequestBody Landmark landmark) {
-		return landmarkRepository.save(landmark);
+//	public @ResponseBody Landmark addNew(@RequestBody Landmark landmark) {
+	public void addNew(@RequestPart("landmark") Landmark landmark,
+	        @RequestPart("photo") MultipartFile photo) {
+		landmarkRepository.save(landmark);
+//		return landmarkRepository.save(landmark);
 	}
 	
 	@PutMapping()
@@ -49,7 +56,7 @@ public class LandmarkController {
 		}
 		return landmarkRepository.save(landmark);
 	}
-	
+	@CrossOrigin(origins = "*")
 	@DeleteMapping(path="/delete/{landmarkId}")
 	public void deleteLandmark(@PathParam("landmarkId") long landmarkId ) {
 		if (!landmarkRepository.existsById(landmarkId)) {

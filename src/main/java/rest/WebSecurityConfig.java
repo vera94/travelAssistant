@@ -32,8 +32,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	    @Override
 	    protected void configure(HttpSecurity http) throws Exception {
 	        http.cors().and().csrf().disable().authorizeRequests()
-	                .antMatchers(HttpMethod.POST, SIIN_UP_URL).permitAll()
-	                .antMatchers(HttpMethod.POST, REGISTRATION_URL).permitAll()
+	        .antMatchers(HttpMethod.GET).permitAll()
+	        .antMatchers(HttpMethod.POST).permitAll()
+	        .antMatchers(HttpMethod.DELETE).permitAll()
+//	                .antMatchers(HttpMethod.POST, SIIN_UP_URL).permitAll()
+//	                .antMatchers(HttpMethod.POST, REGISTRATION_URL).permitAll()
 	                .anyRequest().authenticated()
 	                .and()
 	                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
@@ -56,9 +59,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	    @Bean
 	    CorsConfigurationSource corsConfigurationSource() {
 	        CorsConfiguration configuration = new CorsConfiguration();
-	        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-	        configuration.setAllowedMethods(Arrays.asList("GET","POST"));
-	        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+	        configuration.setAllowedOrigins(Arrays.asList("*"));
+	        configuration.setAllowedMethods(Arrays.asList("GET","POST", "DELETE", "PUT", "OPTIONS"));
+	        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Access-Control-Allow-Origin"));
 	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 	        source.registerCorsConfiguration("/**", configuration);
 	        return source;

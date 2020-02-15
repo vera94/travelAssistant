@@ -6,6 +6,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 public class Landmark {
@@ -22,6 +25,9 @@ public class Landmark {
 	private float lat;
 	
 	private float lng;
+	
+	@Transient
+	private MultipartFile photo;
 	
 	@Enumerated(EnumType.STRING)
 	private LandmarkType type;
@@ -80,6 +86,14 @@ public class Landmark {
 
 	public void setType(LandmarkType type) {
 		this.type = type;
+	}
+
+	public MultipartFile getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(MultipartFile photo) {
+		this.photo = photo;
 	}
 	
 }
