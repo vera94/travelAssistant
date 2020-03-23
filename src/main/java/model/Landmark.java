@@ -1,5 +1,8 @@
 package model;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -27,7 +30,7 @@ public class Landmark {
 	private float lng;
 	
 	@Transient
-	private MultipartFile photo;
+	private byte[] photo;
 	
 	@Enumerated(EnumType.STRING)
 	private LandmarkType type;
@@ -88,12 +91,12 @@ public class Landmark {
 		this.type = type;
 	}
 
-	public MultipartFile getPhoto() {
+	public byte[] getPhoto() {
 		return photo;
 	}
 
-	public void setPhoto(MultipartFile photo) {
-		this.photo = photo;
+	public void setPhoto(byte[] file) {
+		this.photo = file;
 	}
 	
 }
