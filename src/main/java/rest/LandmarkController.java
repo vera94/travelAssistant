@@ -1,19 +1,17 @@
 package rest;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletContext;
 
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -59,7 +56,7 @@ public class LandmarkController {
 	}
 	@CrossOrigin(origins = "*")
 	@PostMapping()
-	public void addNew(@RequestPart("landmark") Landmark landmark,
+	public @ResponseBody Landmark addNew(@RequestPart("landmark") Landmark landmark,
 	        @RequestPart(required = false,value = "photo") MultipartFile photo) {
 		if(photo != null) {
 			String destination = context.getRealPath("");
@@ -71,11 +68,11 @@ public class LandmarkController {
 			}
 		    landmark.setPhotoUrl(file.getPath());
 		}
-		landmark = landmarkRepository.save(landmark);
+		return landmark = landmarkRepository.save(landmark);
 	}
 	
 	@PutMapping()
-	public void editLandmark(@RequestPart("landmark") Landmark landmark,
+	public @ResponseBody Landmark editLandmark(@RequestPart("landmark") Landmark landmark,
 	        @RequestPart(required = false,value = "photo") MultipartFile photo) {
 		if (!landmarkRepository.existsById(landmark.getId())) {
 			throw new EntityNotFoundException("Could not find object with id :" + landmark.getId());
@@ -90,15 +87,17 @@ public class LandmarkController {
 			}
 		    landmark.setPhotoUrl(file.getPath()); 
 		}
-		landmark = landmarkRepository.save(landmark);
+		return landmark = landmarkRepository.save(landmark);
 	}
+	
 	@CrossOrigin(origins = "*")
 	@DeleteMapping(path="/delete/{landmarkId}")
-	public void deleteLandmark(@PathVariable("landmarkId") long landmarkId ) {
+	public ResponseEntity<Landmark> deleteLandmark(@PathVariable("landmarkId") long landmarkId ) {
 		if (!landmarkRepository.existsById(landmarkId)) {
 			throw new EntityNotFoundException("Could not find object with id :" + landmarkId);
 		}
 		landmarkRepository.deleteById(landmarkId);
+		return new ResponseEntity<Landmark>(HttpStatus.OK);
 	}
 	
 	@GetMapping(path="/type/{type}")
