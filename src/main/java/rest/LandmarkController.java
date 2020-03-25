@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import model.KeyValuePair;
 import model.Landmark;
+import model.LandmarkType;
 import repository.ILandmarkRepository;
 
 @Controller    
@@ -43,9 +45,18 @@ public class LandmarkController {
 				 File photo = new File(landmark.getPhotoUrl());
 				 landmark.setPhoto(Files.readAllBytes(photo.toPath()));
 			 }
+			 if(landmark.getType() != null) {
+				 landmark.setLandmarkTypeName(landmark.getType().getName());
+			 }
 		}
 		 return landmarks;
 	}
+	
+	@GetMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Iterable<KeyValuePair<LandmarkType, String>> getLandmarkTypes() throws IOException {
+		 return LandmarkType.getTypesAsKeyValuePairs();
+	}
+	
 	
 	@GetMapping(path="/landmark/{landmarkId}")
 	public @ResponseBody Optional<Landmark> getLandmark(@PathVariable("landmarkId") long landmarkId) {

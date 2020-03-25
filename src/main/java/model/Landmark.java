@@ -1,8 +1,5 @@
 package model;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -10,8 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
-
-import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 public class Landmark {
@@ -31,6 +26,9 @@ public class Landmark {
 	
 	@Transient
 	private byte[] photo;
+	
+	@Transient
+	private String landmarkTypeName;
 	
 	@Enumerated(EnumType.STRING)
 	private LandmarkType type;
@@ -97,6 +95,14 @@ public class Landmark {
 
 	public void setPhoto(byte[] file) {
 		this.photo = file;
+	}
+
+	public String getLandmarkTypeName() {
+		return landmarkTypeName;
+	}
+
+	public void setLandmarkTypeName(String landmarkTypeName) {
+		this.landmarkTypeName = landmarkTypeName;
 	}
 	
 }

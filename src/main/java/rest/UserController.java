@@ -3,6 +3,8 @@ package rest;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,22 +31,13 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public void login(@RequestBody UserEntity user) {
+    public ResponseEntity<Object> login(@RequestBody UserEntity user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setGrantedAuthoritiesList(Arrays.asList(Role.USER));
         userRepository.save(user);
+        return ResponseEntity.ok().build();
     }
     
-	@PostMapping(path="/add") 
-	public @ResponseBody String addNewUser () {
-
-		UserEntity n = new UserEntity();
-		n.setFirstName("vera");
-		n.setEmail("email");
-		userRepository.save(n);
-		return "Saved";
-	}
-
 	@GetMapping(path="/all")
 	public @ResponseBody Iterable<UserEntity> getAllUsers() {
 		// This returns a JSON or XML with the users

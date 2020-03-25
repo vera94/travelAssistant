@@ -5,11 +5,12 @@ import java.util.Collection;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
-import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 public class UserEntity {
@@ -20,17 +21,13 @@ public class UserEntity {
 	private String firstName;
 	private String lastName;
 	private String password;
-	@ElementCollection(targetClass=String.class)
-	private Collection<GrantedAuthority> grantedAuthoritiesList = new ArrayList<>();
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
+	private Collection<Role> grantedAuthoritiesList = new ArrayList<>();
 
 	public UserEntity() {
 	}
 
-	public UserEntity(String email, String firstName, String lastName) {
-		this.email = email;
-		this.firstName = firstName;
-		this.lastName = lastName;
-	}
 
 	@Override
 	public String toString() {
@@ -77,11 +74,11 @@ public class UserEntity {
 		this.password = password;
 	}
 
-	public Collection<GrantedAuthority> getGrantedAuthoritiesList() {
+	public Collection<Role> getGrantedAuthoritiesList() {
 		return grantedAuthoritiesList;
 	}
 
-	public void setGrantedAuthoritiesList(Collection<GrantedAuthority> grantedAuthoritiesList) {
+	public void setGrantedAuthoritiesList(Collection<Role> grantedAuthoritiesList) {
 		this.grantedAuthoritiesList = grantedAuthoritiesList;
 	}
 }
