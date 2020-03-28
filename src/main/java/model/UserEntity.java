@@ -25,6 +25,10 @@ public class UserEntity {
 	@Enumerated(EnumType.STRING)
 	private Collection<Role> grantedAuthoritiesList = new ArrayList<>();
 
+	@ElementCollection()
+	@Enumerated(EnumType.STRING)
+	private Collection<LandmarkType> prefferedLandmarkTypes = new ArrayList<>();
+	
 	public UserEntity() {
 	}
 
@@ -80,5 +84,15 @@ public class UserEntity {
 
 	public void setGrantedAuthoritiesList(Collection<Role> grantedAuthoritiesList) {
 		this.grantedAuthoritiesList = grantedAuthoritiesList;
+	}
+
+
+	public Collection<LandmarkType> getPrefferedLandmarkTypes() {
+		return prefferedLandmarkTypes;
+	}
+
+
+	public void setPrefferedLandmarkTypes(Collection<LandmarkType> prefferedLandmarkTypes) {
+		this.prefferedLandmarkTypes = prefferedLandmarkTypes;
 	}
 }
