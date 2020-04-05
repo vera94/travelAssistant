@@ -63,6 +63,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withSubject(principal.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).withClaim("ROLE", principal.getAuthorities().toArray()[0].toString())
                 .sign(Algorithm.HMAC512(SECRET.getBytes()));
+		//TODO : add custum validation for revoked jwt
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
         res.addHeader("Access-Control-Expose-Headers", HEADER_STRING);
     }
