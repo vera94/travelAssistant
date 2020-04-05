@@ -2,12 +2,11 @@ package rest;
 
 
 import static model.EnpointConstants.EXPIRATION_TIME;
-import static model.EnpointConstants.SECRET;
 import static model.EnpointConstants.HEADER_STRING;
+import static model.EnpointConstants.SECRET;
 import static model.EnpointConstants.TOKEN_PREFIX;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 
 import javax.servlet.FilterChain;
@@ -46,7 +45,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     new UsernamePasswordAuthenticationToken(
                             creds.getEmail(),
                             creds.getPassword(),
-                            new ArrayList<>())
+                            creds.getGrantedAuthoritiesList())
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -59,9 +58,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
-        String token = JWT.create()
-                .withSubject(((User) auth.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+        User principal = (User) auth.getPrincipal();
+		String token = JWT.create()
+                .withSubject(principal.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).withClaim("ROLE", principal.getAuthorities().toArray()[0].toString())
                 .sign(Algorithm.HMAC512(SECRET.getBytes()));
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
         res.addHeader("Access-Control-Expose-Headers", HEADER_STRING);
