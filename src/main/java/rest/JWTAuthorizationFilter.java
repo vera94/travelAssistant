@@ -1,6 +1,7 @@
 package rest;
 
 import static model.EnpointConstants.HEADER_STRING;
+import static model.EnpointConstants.ROLE_STRING;
 import static model.EnpointConstants.SECRET;
 import static model.EnpointConstants.TOKEN_PREFIX;
 
@@ -52,7 +53,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 			DecodedJWT jwtDecoded = JWT.require(Algorithm.HMAC512(SECRET.getBytes())).build()
 					.verify(token.replace(TOKEN_PREFIX, ""));
 			String user = jwtDecoded.getSubject();
-			Role role = Role.valueOf(jwtDecoded.getClaim("ROLE").asString());
+			Role role = Role.valueOf(jwtDecoded.getClaim(ROLE_STRING).asString());
 
 			if (user != null) {
 				return new UsernamePasswordAuthenticationToken(user, null, Arrays.asList(role));

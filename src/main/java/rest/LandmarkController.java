@@ -70,8 +70,7 @@ public class LandmarkController {
 	public @ResponseBody Landmark addNew(@RequestPart("landmark") Landmark landmark,
 	        @RequestPart(required = false,value = "photo") MultipartFile photo) {
 		if(photo != null) {
-			String destination = context.getRealPath("");
-		    File file = new File(destination, photo.getOriginalFilename());
+		    File file = new File("C:\\AngularPics", photo.getOriginalFilename());
 		    try {
 				photo.transferTo(file);
 			} catch (IllegalStateException | IOException e) {
@@ -89,8 +88,7 @@ public class LandmarkController {
 			throw new EntityNotFoundException("Could not find object with id :" + landmark.getId());
 		}
 		if(photo != null) {
-			String destination = context.getRealPath("");
-		    File file = new File(destination, photo.getOriginalFilename());
+		    File file = new File("C:\\AngularPics", photo.getOriginalFilename());
 		    try {
 				photo.transferTo(file);
 			} catch (IllegalStateException | IOException e) {

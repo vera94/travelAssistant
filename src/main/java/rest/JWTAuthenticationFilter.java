@@ -3,6 +3,7 @@ package rest;
 
 import static model.EnpointConstants.EXPIRATION_TIME;
 import static model.EnpointConstants.HEADER_STRING;
+import static model.EnpointConstants.ROLE_STRING;
 import static model.EnpointConstants.SECRET;
 import static model.EnpointConstants.TOKEN_PREFIX;
 
@@ -61,10 +62,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         User principal = (User) auth.getPrincipal();
 		String token = JWT.create()
                 .withSubject(principal.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).withClaim("ROLE", principal.getAuthorities().toArray()[0].toString())
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).withClaim(ROLE_STRING, principal.getAuthorities().toArray()[0].toString())
                 .sign(Algorithm.HMAC512(SECRET.getBytes()));
 		//TODO : add custum validation for revoked jwt
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
         res.addHeader("Access-Control-Expose-Headers", HEADER_STRING);
+        res.addHeader(ROLE_STRING, principal.getAuthorities().toArray()[0].toString());
     }
 }

@@ -7,4 +7,6 @@ public class EnpointConstants {
     public static final String HEADER_STRING = "Authorization";
     public static final String SIIN_UP_URL = "/user/signup";
     public static final String REGISTRATION_URL = "/user/register";
+    public static final String ROLE_STRING = "Role";
+    
 }
