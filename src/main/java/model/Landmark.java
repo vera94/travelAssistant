@@ -24,6 +24,8 @@ public class Landmark {
 	
 	private float lng;
 	
+	private double rating;
+	
 	@Transient
 	private byte[] photo;
 	
@@ -79,6 +81,14 @@ public class Landmark {
 
 	public void setLng(float lng) {
 		this.lng = lng;
+	}
+
+	public double getRating() {
+		return rating;
+	}
+
+	public void setRating(double rating) {
+		this.rating = rating;
 	}
 
 	public LandmarkType getType() {

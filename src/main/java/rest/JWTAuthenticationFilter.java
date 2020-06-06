@@ -66,7 +66,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .sign(Algorithm.HMAC512(SECRET.getBytes()));
 		//TODO : add custum validation for revoked jwt
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
-        res.addHeader("Access-Control-Expose-Headers", HEADER_STRING);
+        res.addHeader("Access-Control-Expose-Headers", HEADER_STRING + "," + ROLE_STRING);
         res.addHeader(ROLE_STRING, principal.getAuthorities().toArray()[0].toString());
     }
 }

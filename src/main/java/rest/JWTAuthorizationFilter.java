@@ -54,7 +54,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 					.verify(token.replace(TOKEN_PREFIX, ""));
 			String user = jwtDecoded.getSubject();
 			Role role = Role.valueOf(jwtDecoded.getClaim(ROLE_STRING).asString());
-
 			if (user != null) {
 				return new UsernamePasswordAuthenticationToken(user, null, Arrays.asList(role));
 			}
