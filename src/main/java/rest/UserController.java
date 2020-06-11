@@ -1,8 +1,6 @@
 package rest;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import model.KeyValuePair;
-import model.LandmarkType;
 import model.Role;
 import model.UserEntity;
 import model.UserEntityDto;
@@ -57,7 +53,7 @@ public class UserController {
 		userEntity.setFirstName(userDto.getFirstName());
 		userEntity.setLastName(userDto.getLastName());
 		userEntity.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
-		userEntity.setPrefferedLandmarkTypes(userDto.getPrefferedLandmarkTypes());
+//		userEntity.setPrefferedLandmarkTypes(userDto.getPrefferedLandmarkTypes());
         userRepository.save(userEntity);
         return ResponseEntity.ok().build();
     }

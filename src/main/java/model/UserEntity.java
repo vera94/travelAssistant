@@ -26,7 +26,6 @@ public class UserEntity {
 	private Collection<Role> grantedAuthoritiesList = new ArrayList<>();
 
 	@ElementCollection()
-	@Enumerated(EnumType.STRING)
 	private Collection<LandmarkType> prefferedLandmarkTypes = new ArrayList<>();
 	
 	public UserEntity() {

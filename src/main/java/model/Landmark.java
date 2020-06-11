@@ -1,15 +1,14 @@
 package model;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 @Entity
-public class Landmark {
+public class Landmark implements Comparable<Landmark>{
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
@@ -32,7 +31,7 @@ public class Landmark {
 	@Transient
 	private String landmarkTypeName;
 	
-	@Enumerated(EnumType.STRING)
+	@OneToOne
 	private LandmarkType type;
 
 	public Long getId() {
@@ -115,4 +114,8 @@ public class Landmark {
 		this.landmarkTypeName = landmarkTypeName;
 	}
 	
+	@Override
+	public int compareTo(Landmark other) {
+        return rating < other.rating? -1 : rating > other.rating ? 1 : 0;
+    }
 }

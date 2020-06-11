@@ -45,16 +45,16 @@ public class LandmarkController {
 				 File photo = new File(landmark.getPhotoUrl());
 				 landmark.setPhoto(Files.readAllBytes(photo.toPath()));
 			 }
-			 if(landmark.getType() != null) {
-				 landmark.setLandmarkTypeName(landmark.getType().getName());
-			 }
+//			 if(landmark.getType() != null) {
+//				 landmark.setLandmarkTypeName(landmark.getType().getName());
+//			 }
 		}
 		 return landmarks;
 	}
 	
 	@GetMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Iterable<KeyValuePair<LandmarkType, String>> getLandmarkTypes() throws IOException {
-		 return LandmarkType.getTypesAsKeyValuePairs();
+		 return null;// LandmarkTyp.getTypesAsKeyValuePairs();
 	}
 	
 	
