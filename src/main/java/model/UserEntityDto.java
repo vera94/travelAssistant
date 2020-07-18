@@ -7,7 +7,7 @@ public class UserEntityDto {
 	private String firstName;
 	private String lastName;
 	private String password;
-//	private List<LandmarkTyp> prefferedLandmarkTypes;
+	private List<LandmarkType> prefferedLandmarkTypes;
 	
 	public UserEntityDto(){
 		super();
@@ -18,7 +18,7 @@ public class UserEntityDto {
 		this.firstName = user.getFirstName();
 		this.lastName = user.getLastName();
 		this.password = "";
-//		this.setPrefferedLandmarkTypes((List<LandmarkTyp>) user.getPrefferedLandmarkTypes());
+		this.setPrefferedLandmarkTypes((List<LandmarkType>) user.getPrefferedLandmarkTypes());
 	}
 	
 	public String getEmail() {
@@ -46,11 +46,11 @@ public class UserEntityDto {
 		this.password = password;
 	}
 
-//	public List<LandmarkTyp> getPrefferedLandmarkTypes() {
-//		return prefferedLandmarkTypes;
-//	}
-//
-//	public void setPrefferedLandmarkTypes(List<LandmarkTyp> prefferedLandmarkTypes) {
-//		this.prefferedLandmarkTypes = prefferedLandmarkTypes;
-//	}
+	public List<LandmarkType> getPrefferedLandmarkTypes() {
+		return prefferedLandmarkTypes;
+	}
+
+	public void setPrefferedLandmarkTypes(List<LandmarkType> prefferedLandmarkTypes) {
+		this.prefferedLandmarkTypes = prefferedLandmarkTypes;
+	}
 }

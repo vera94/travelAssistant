@@ -3,6 +3,7 @@ package rest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -24,95 +25,107 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import model.KeyValuePair;
 import model.Landmark;
-import model.LandmarkType;
 import repository.ILandmarkRepository;
 
 @Controller    
 @RequestMapping(path="/landmark") 
 public class LandmarkController {
 	@Autowired
-	ServletContext context; 
-	@Autowired 
+	ServletContext context;
+	@Autowired
 	private ILandmarkRepository landmarkRepository;
-	
-	@GetMapping(path="/all", produces = MediaType.APPLICATION_JSON_VALUE)
+
+	private DirectionsService directionService = new DirectionsService("");
+
+	@GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Iterable<Landmark> getAllLandmarks() throws IOException {
-		 Iterable<Landmark> landmarks = landmarkRepository.findAll();
-		 for (Landmark landmark : landmarks) {
-			 if(landmark.getPhotoUrl() != null && !landmark.getPhotoUrl().isEmpty()) {
-				 File photo = new File(landmark.getPhotoUrl());
-				 landmark.setPhoto(Files.readAllBytes(photo.toPath()));
-			 }
+		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.findAll();
+		for (Landmark landmark : landmarks) {
+			if (landmark.getPhotoUrl() != null && !landmark.getPhotoUrl().isEmpty()) {
+				File photo = new File(landmark.getPhotoUrl());
+				landmark.setPhoto(Files.readAllBytes(photo.toPath()));
+			}
 //			 if(landmark.getType() != null) {
 //				 landmark.setLandmarkTypeName(landmark.getType().getName());
 //			 }
 		}
-		 return landmarks;
+		List<Landmark> allPlacesFromMapsApi = directionService.findAllPlaces();
+		landmarks.addAll(allPlacesFromMapsApi);
+		return landmarks;
 	}
-	
-	@GetMapping(path="/types", produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Iterable<KeyValuePair<LandmarkType, String>> getLandmarkTypes() throws IOException {
-		 return null;// LandmarkTyp.getTypesAsKeyValuePairs();
+
+	@GetMapping(path = "/dblandmarks", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Iterable<Landmark> getDatabaseLandmarks() throws IOException {
+		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.findAll();
+		for (Landmark landmark : landmarks) {
+			if (landmark.getPhotoUrl() != null && !landmark.getPhotoUrl().isEmpty()) {
+				File photo = new File(landmark.getPhotoUrl());
+				landmark.setPhoto(Files.readAllBytes(photo.toPath()));
+			}
+//			 if(landmark.getType() != null) {
+//				 landmark.setLandmarkTypeName(landmark.getType().getName());
+//			 }
+		}
+		return landmarks;
 	}
-	
-	
-	@GetMapping(path="/landmark/{landmarkId}")
+
+	@GetMapping(path = "/landmark/{landmarkId}")
 	public @ResponseBody Optional<Landmark> getLandmark(@PathVariable("landmarkId") long landmarkId) {
 		if (!landmarkRepository.existsById(landmarkId)) {
 			throw new EntityNotFoundException("Could not find object with id :" + landmarkId);
 		}
 		return landmarkRepository.findById(landmarkId);
 	}
+
 	@CrossOrigin(origins = "*")
 	@PostMapping()
 	public @ResponseBody Landmark addNew(@RequestPart("landmark") Landmark landmark,
-	        @RequestPart(required = false,value = "photo") MultipartFile photo) {
-		if(photo != null) {
-		    File file = new File("C:\\AngularPics", photo.getOriginalFilename());
-		    try {
+			@RequestPart(required = false, value = "photo") MultipartFile photo) {
+		if (photo != null) {
+			File file = new File("C:\\AngularPics", photo.getOriginalFilename());
+			try {
 				photo.transferTo(file);
 			} catch (IllegalStateException | IOException e) {
 				e.printStackTrace();
 			}
-		    landmark.setPhotoUrl(file.getPath());
+			landmark.setPhotoUrl(file.getPath());
 		}
 		return landmark = landmarkRepository.save(landmark);
 	}
-	
+
 	@PutMapping()
 	public @ResponseBody Landmark editLandmark(@RequestPart("landmark") Landmark landmark,
-	        @RequestPart(required = false,value = "photo") MultipartFile photo) {
+			@RequestPart(required = false, value = "photo") MultipartFile photo) {
 		if (!landmarkRepository.existsById(landmark.getId())) {
 			throw new EntityNotFoundException("Could not find object with id :" + landmark.getId());
 		}
-		if(photo != null) {
-		    File file = new File("C:\\AngularPics", photo.getOriginalFilename());
-		    try {
+		if (photo != null) {
+			File file = new File("C:\\AngularPics", photo.getOriginalFilename());
+			try {
 				photo.transferTo(file);
 			} catch (IllegalStateException | IOException e) {
 				e.printStackTrace();
 			}
-		    landmark.setPhotoUrl(file.getPath()); 
+			landmark.setPhotoUrl(file.getPath());
 		}
 		return landmark = landmarkRepository.save(landmark);
 	}
-	
+
 	@CrossOrigin(origins = "*")
-	@DeleteMapping(path="/delete/{landmarkId}")
-	public ResponseEntity<Landmark> deleteLandmark(@PathVariable("landmarkId") long landmarkId ) {
+	@DeleteMapping(path = "/delete/{landmarkId}")
+	public ResponseEntity<Landmark> deleteLandmark(@PathVariable("landmarkId") long landmarkId) {
 		if (!landmarkRepository.existsById(landmarkId)) {
 			throw new EntityNotFoundException("Could not find object with id :" + landmarkId);
 		}
 		landmarkRepository.deleteById(landmarkId);
 		return new ResponseEntity<Landmark>(HttpStatus.OK);
 	}
-	
-	@GetMapping(path="/type/{type}")
+
+	@GetMapping(path = "/type/{type}")
 	public @ResponseBody Iterable<Landmark> getLandmarksByType(@PathVariable("type") String type) {
 		// This returns a JSON or XML with the users
 		return landmarkRepository.getAllLandmarksByType(type);
 	}
-	
+
 }

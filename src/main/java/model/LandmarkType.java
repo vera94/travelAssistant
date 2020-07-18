@@ -1,9 +1,12 @@
 package model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 @Entity
 public class LandmarkType {
@@ -13,6 +16,12 @@ public class LandmarkType {
 	private String type;
 	private String path;
 	private String gmapMapping;
+
+	@Transient
+	private String parentPath;
+
+	@Transient
+	private List<LandmarkType> children;
 
 	public Long getId() {
 		return id;
@@ -44,5 +53,21 @@ public class LandmarkType {
 
 	public void setGmapMapping(String gmapMapping) {
 		this.gmapMapping = gmapMapping;
+	}
+
+	public List<LandmarkType> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<LandmarkType> children) {
+		this.children = children;
+	}
+
+	public String getParentPath() {
+		return parentPath;
+	}
+
+	public void setParentPath(String parentPath) {
+		this.parentPath = parentPath;
 	}
 }

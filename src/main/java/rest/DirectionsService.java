@@ -1,6 +1,7 @@
 package rest;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +15,8 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.EncodedPolyline;
 import com.google.maps.model.LatLng;
+import com.google.maps.model.PlaceType;
+import com.google.maps.model.PlacesSearchResult;
 
 import model.DirectionsRequestDto;
 import model.Landmark;
@@ -22,9 +25,21 @@ import repository.ILandmarkRepository;;
 public class DirectionsService {
 	@Autowired 
 	private ILandmarkRepository landmarkRepository;
+	private String apiKey;
+	
+	public DirectionsService(){
+	}
+	
+	public DirectionsService(String key){
+		this.apiKey = key;				
+	}
+	
+	public List<PlaceType> getGmapTypes(){
+		return Arrays.asList(PlaceType.values());
+	}
 	
 	public DirectionsResult getDirections(DirectionsRequestDto request) throws ApiException, InterruptedException, IOException {
-		GMapsClient client = new GMapsClient("");
+		GMapsClient client = new GMapsClient(apiKey);
 		DirectionsResult directions = client.getDirections(request, null);
 		Iterable<Landmark> allLandmarks = landmarkRepository.findAll();
 		EncodedPolyline path = directions.routes[0].overviewPolyline;
@@ -37,6 +52,27 @@ public class DirectionsService {
 		
 	}
 
+	public List<Landmark> findAllPlaces() {
+		List<Landmark> results = new ArrayList<>();
+		GMapsClient client = new GMapsClient(apiKey);
+		try {
+			List<PlacesSearchResult> findPlaces = client.findPlaces(null, null);
+			for (PlacesSearchResult placesSearchResult : findPlaces) {
+				Landmark landmark = new Landmark();
+				LatLng latLng = placesSearchResult.geometry.location;
+				landmark.setLat((float) latLng.lat);
+				landmark.setLng((float) latLng.lng);
+				landmark.setName(placesSearchResult.name);
+				landmark.setRating(placesSearchResult.rating);
+				results.add(landmark);
+			}
+		} catch (ApiException | InterruptedException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return results;
+	}
+	
 	private List<Waypoint> findHotels(GMapsClient client, DirectionsResult directionsResult, int hotelStays) throws ApiException, InterruptedException, IOException {
 		List<Waypoint> hotels = new ArrayList<>();
 		DirectionsLeg[] directionsLegs = directionsResult.routes[0].legs;
@@ -120,4 +156,5 @@ public class DirectionsService {
 	private double rad2deg(double rad) {
 		  return (rad * 180.0 / Math.PI);
 		}
+
 }
