@@ -1,6 +1,7 @@
 package rest;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import model.LandmarkType;
 import model.Role;
 import model.UserEntity;
 import model.UserEntityDto;
@@ -53,7 +55,15 @@ public class UserController {
 		userEntity.setFirstName(userDto.getFirstName());
 		userEntity.setLastName(userDto.getLastName());
 		userEntity.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
-//		userEntity.setPrefferedLandmarkTypes(userDto.getPrefferedLandmarkTypes());
+        userRepository.save(userEntity);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PutMapping(path="/prefferdTypes")
+    public ResponseEntity<Object> updatePrefferedTypes(@RequestBody  List<LandmarkType> prefferedTypes, HttpServletRequest httpServletRequest) throws Exception {
+    	String email = httpServletRequest.getAttribute("email").toString();
+		UserEntity userEntity = userRepository.fingByEmail(email);
+		userEntity.setPrefferedLandmarkTypes(prefferedTypes);
         userRepository.save(userEntity);
         return ResponseEntity.ok().build();
     }

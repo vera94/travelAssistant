@@ -44,6 +44,10 @@ public class TypeController {
 	@Autowired // This means to get the bean called userRepository
 	private IUserRepository userRepository;
 	
+	@GetMapping(path="/list", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Iterable<LandmarkType> getLandmarkTypesAsList() throws IOException {
+		return (List<LandmarkType>) landmarkTypeRepository.getAllTypes();
+	}
 	
 	
 	@GetMapping(path="/all", produces = MediaType.APPLICATION_JSON_VALUE)
