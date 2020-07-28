@@ -2,6 +2,7 @@ package rest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.google.maps.model.PlacesSearchResult;
 
 import model.DirectionsRequestDto;
 import model.Landmark;
+import model.LandmarkType;
 import repository.ILandmarkRepository;;
 
 public class DirectionsService {
@@ -52,23 +54,29 @@ public class DirectionsService {
 		
 	}
 
-	public List<Landmark> findAllPlaces() {
+	public List<Landmark> findAllPlaces(Collection<LandmarkType> collection) {
 		List<Landmark> results = new ArrayList<>();
 		GMapsClient client = new GMapsClient(apiKey);
-		try {
-			List<PlacesSearchResult> findPlaces = client.findPlaces(null, null);
-			for (PlacesSearchResult placesSearchResult : findPlaces) {
-				Landmark landmark = new Landmark();
-				LatLng latLng = placesSearchResult.geometry.location;
-				landmark.setLat((float) latLng.lat);
-				landmark.setLng((float) latLng.lng);
-				landmark.setName(placesSearchResult.name);
-				landmark.setRating(placesSearchResult.rating);
-				results.add(landmark);
+		for (LandmarkType landmarkType : collection) {
+			String gmapPlaceTypeString = landmarkType.getGmapMapping();
+			if (gmapPlaceTypeString != null && !gmapPlaceTypeString.isEmpty()) {
+				try {
+					PlaceType placeType = PlaceType.valueOf(landmarkType.getGmapMapping());
+					List<PlacesSearchResult> findPlaces = client.findPlaces(placeType, null);
+					for (PlacesSearchResult placesSearchResult : findPlaces) {
+						Landmark landmark = new Landmark();
+						LatLng latLng = placesSearchResult.geometry.location;
+						landmark.setLat((float) latLng.lat);
+						landmark.setLng((float) latLng.lng);
+						landmark.setName(placesSearchResult.name);
+						landmark.setRating(placesSearchResult.rating);
+						results.add(landmark);
+					}
+				} catch (ApiException | InterruptedException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		} catch (ApiException | InterruptedException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return results;
 	}

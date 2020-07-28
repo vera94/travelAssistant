@@ -9,8 +9,8 @@ import model.LandmarkType;
 
 public interface ILandmarkTypeRepository extends CrudRepository<LandmarkType, Long> {
 
-	@Query("SELECT l FROM LandmarkType l WHERE ?1 LIKE l.path || '%'")
-	List<LandmarkType> getAllTypeAncestors(String path);
+//	@Query("SELECT l FROM LandmarkType l WHERE ?1 LIKE l.path || '%'")
+//	List<LandmarkType> getAllTypeAncestors(String path);
 
 	@Query("SELECT l FROM LandmarkType l WHERE l.path LIKE ?1")
 	List<LandmarkType> getAllTypeDescendants(String type);

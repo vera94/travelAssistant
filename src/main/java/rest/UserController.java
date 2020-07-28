@@ -1,6 +1,7 @@
 package rest;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,7 +55,10 @@ public class UserController {
     	}
 		userEntity.setFirstName(userDto.getFirstName());
 		userEntity.setLastName(userDto.getLastName());
-		userEntity.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
+		String password = userDto.getPassword();
+		if(password != null && !password.isEmpty()) {
+			userEntity.setPassword(bCryptPasswordEncoder.encode(password));
+		}
         userRepository.save(userEntity);
         return ResponseEntity.ok().build();
     }
@@ -64,6 +68,14 @@ public class UserController {
     	String email = httpServletRequest.getAttribute("email").toString();
 		UserEntity userEntity = userRepository.fingByEmail(email);
 		userEntity.setPrefferedLandmarkTypes(prefferedTypes);
+        userRepository.save(userEntity);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PutMapping(path="/role")
+    public ResponseEntity<Object> updateUserRole(@RequestBody UserEntity user) throws Exception {
+		UserEntity userEntity = userRepository.fingByEmail(user.getEmail());
+		userEntity.setGrantedAuthoritiesList(user.getGrantedAuthoritiesList());
         userRepository.save(userEntity);
         return ResponseEntity.ok().build();
     }

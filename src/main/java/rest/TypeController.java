@@ -54,8 +54,10 @@ public class TypeController {
 	public @ResponseBody Iterable<LandmarkType> getLandmarkTypes() throws IOException {
 		List<LandmarkType> allTypes = (List<LandmarkType>) landmarkTypeRepository.getAllTypes();
 		List<LandmarkType> result = new ArrayList<>();
+		if(allTypes != null && !allTypes.isEmpty()) {
 		prepareResponseFroUI(allTypes.get(0), allTypes);
 		result.add(allTypes.get(0));
+		}
 		return result;
 	}
 	
@@ -120,11 +122,14 @@ public class TypeController {
 	
 	@CrossOrigin(origins = "*")
 	@DeleteMapping(path="/delete/{landmarkTypeId}")
-	public ResponseEntity<LandmarkType> deleteLandmark(@PathVariable("landmarkTypeId") long landmarkTypeId ) {
+	public ResponseEntity<LandmarkType> deleteLandmark(@PathVariable("landmarkTypeId") long landmarkTypeId ) throws Exception {
 		if (!landmarkTypeRepository.existsById(landmarkTypeId)) {
 			throw new EntityNotFoundException("Could not find object with id :" + landmarkTypeId);
 		}
 		Optional<LandmarkType> findById = landmarkTypeRepository.findById(landmarkTypeId);
+		if(findById.get().getPath().split("/").length == 2) {
+			throw new Exception("Could not delete root element.");
+		}
 		List<LandmarkType> allTypeDescendants = landmarkTypeRepository.getAllTypeDescendants(findById.get().getPath()+"%");
 		for (LandmarkType landmarkType : allTypeDescendants) {
 			landmarkTypeRepository.deleteById(landmarkType.getId());

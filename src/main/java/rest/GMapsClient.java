@@ -49,7 +49,7 @@ public class GMapsClient {
 	
 	public List<PlacesSearchResult> findPlaces(PlaceType placeType, LatLng place) throws ApiException, InterruptedException, IOException {
 		NearbySearchRequest nearbySearchQuery = PlacesApi.nearbySearchQuery(context, new LatLng(42.698334, 23.319941));
-		nearbySearchQuery.type(PlaceType.CHURCH); //bg
+		nearbySearchQuery.type(placeType);
 		nearbySearchQuery.rankby(RankBy.DISTANCE);
 		List<PlacesSearchResult> places = new ArrayList<>();
 		PlacesSearchResponse searchResponse = null;

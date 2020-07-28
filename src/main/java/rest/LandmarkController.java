@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import model.Landmark;
+import model.UserEntity;
 import repository.ILandmarkRepository;
+import repository.IUserRepository;
 
 @Controller    
 @RequestMapping(path="/landmark") 
@@ -35,12 +38,16 @@ public class LandmarkController {
 	ServletContext context;
 	@Autowired
 	private ILandmarkRepository landmarkRepository;
+	@Autowired
+	private IUserRepository userRepository;
 
 	private DirectionsService directionService = new DirectionsService("");
 
 	@GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Iterable<Landmark> getAllLandmarks() throws IOException {
-		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.findAll();
+	public @ResponseBody Iterable<Landmark> getAllLandmarks(HttpServletRequest httpServletRequest) throws IOException {
+		String email = httpServletRequest.getAttribute("email").toString();
+		UserEntity userEntity = userRepository.fingByEmail(email);
+		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypes());
 		for (Landmark landmark : landmarks) {
 			if (landmark.getPhotoUrl() != null && !landmark.getPhotoUrl().isEmpty()) {
 				File photo = new File(landmark.getPhotoUrl());
@@ -50,7 +57,7 @@ public class LandmarkController {
 				 landmark.setLandmarkTypeName(landmark.getType().getType());
 			 }
 		}
-		List<Landmark> allPlacesFromMapsApi = directionService.findAllPlaces();
+		List<Landmark> allPlacesFromMapsApi = directionService.findAllPlaces(userEntity.getPrefferedLandmarkTypes());
 		landmarks.addAll(allPlacesFromMapsApi);
 		return landmarks;
 	}
@@ -120,12 +127,6 @@ public class LandmarkController {
 		}
 		landmarkRepository.deleteById(landmarkId);
 		return new ResponseEntity<Landmark>(HttpStatus.OK);
-	}
-
-	@GetMapping(path = "/type/{type}")
-	public @ResponseBody Iterable<Landmark> getLandmarksByType(@PathVariable("type") String type) {
-		// This returns a JSON or XML with the users
-		return landmarkRepository.getAllLandmarksByType(type);
 	}
 
 }
