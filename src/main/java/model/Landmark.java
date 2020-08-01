@@ -1,9 +1,12 @@
 package model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
@@ -28,11 +31,8 @@ public class Landmark implements Comparable<Landmark>{
 	@Transient
 	private byte[] photo;
 	
-	@Transient
-	private String landmarkTypeName;
-	
-	@OneToOne
-	private LandmarkType type;
+	@OneToMany
+	private List<LandmarkType> types;
 
 	public Long getId() {
 		return id;
@@ -90,14 +90,6 @@ public class Landmark implements Comparable<Landmark>{
 		this.rating = rating;
 	}
 
-	public LandmarkType getType() {
-		return type;
-	}
-
-	public void setType(LandmarkType type) {
-		this.type = type;
-	}
-
 	public byte[] getPhoto() {
 		return photo;
 	}
@@ -106,12 +98,12 @@ public class Landmark implements Comparable<Landmark>{
 		this.photo = file;
 	}
 
-	public String getLandmarkTypeName() {
-		return landmarkTypeName;
+	public List<LandmarkType> getTypes() {
+		return types;
 	}
 
-	public void setLandmarkTypeName(String landmarkTypeName) {
-		this.landmarkTypeName = landmarkTypeName;
+	public void setTypes(List<LandmarkType> types) {
+		this.types = types;
 	}
 	
 	@Override

@@ -17,7 +17,7 @@ public interface ILandmarkRepository extends CrudRepository<Landmark, Long> {
 //	@Query("SELECT l FROM Landsmark l")
 //	List<Landmark> getAllLandmarks();
 
-	@Query("SELECT l FROM Landmark l WHERE l.type in (?1)")
+	@Query("SELECT l FROM Landmark l ")//WHERE l.type in (?1)")
 	List<Landmark> getAllLandmarksByType(Collection<LandmarkType> types);
 
 }

@@ -53,9 +53,6 @@ public class LandmarkController {
 				File photo = new File(landmark.getPhotoUrl());
 				landmark.setPhoto(Files.readAllBytes(photo.toPath()));
 			}
-			 if(landmark.getType() != null) {
-				 landmark.setLandmarkTypeName(landmark.getType().getType());
-			 }
 		}
 		List<Landmark> allPlacesFromMapsApi = directionService.findAllPlaces(userEntity.getPrefferedLandmarkTypes());
 		landmarks.addAll(allPlacesFromMapsApi);
@@ -70,9 +67,6 @@ public class LandmarkController {
 				File photo = new File(landmark.getPhotoUrl());
 				landmark.setPhoto(Files.readAllBytes(photo.toPath()));
 			}
-			 if(landmark.getType() != null) {
-				 landmark.setLandmarkTypeName(landmark.getType().getType());
-			 }
 		}
 		return landmarks;
 	}
