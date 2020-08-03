@@ -29,13 +29,13 @@ public class GMapsClient {
 
 
 	public DirectionsResult getDirections(DirectionsRequestDto request, Waypoint[] waypoints) throws ApiException, InterruptedException, IOException {
-		DirectionsApiRequest directionsRequest = DirectionsApi.getDirections(context, request.getOrigin(), request.getDestination());
+		DirectionsApiRequest directionsRequest = DirectionsApi.getDirections(context, "place_id:" + request.getOrigin(), "place_id:" +request.getDestination());
 		directionsRequest.mode(TravelMode.valueOf(request.getTravelMode()));
-		DirectionsResult result = directionsRequest.await();
 		if (waypoints != null && waypoints.length > 0) {
 			directionsRequest.optimizeWaypoints(true);
 			directionsRequest.waypoints(waypoints);
 		}
+		DirectionsResult result = directionsRequest.await();
 		return result;
 	}
 	

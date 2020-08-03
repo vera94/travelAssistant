@@ -3,6 +3,7 @@ package rest;
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,13 +23,16 @@ import model.DirectionsRequestDto;
 public class DirectionsController {
 	@Autowired
 	ServletContext context; 
+	@Autowired 
+	private DirectionsService directionsService;
 	
 	@CrossOrigin(origins = "*")
 	@PostMapping()
-	public @ResponseBody DirectionsResult getDirections(@RequestBody DirectionsRequestDto request) {
-		//set email;
+	public @ResponseBody DirectionsRequestDto getWaypoints(@RequestBody DirectionsRequestDto request, HttpServletRequest httpServletRequest) {
+			String email = httpServletRequest.getAttribute("email").toString();
+			request.setEmail(email);
 		try {
-			return new DirectionsService().getDirections(request);
+			return directionsService.getDirections(request);
 		} catch (ApiException | InterruptedException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

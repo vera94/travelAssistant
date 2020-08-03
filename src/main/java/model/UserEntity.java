@@ -2,6 +2,7 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -93,5 +94,14 @@ public class UserEntity {
 
 	public void setPrefferedLandmarkTypes(Collection<LandmarkType> prefferedLandmarkTypes) {
 		this.prefferedLandmarkTypes = prefferedLandmarkTypes;
+	}
+
+
+	public Collection<String> getPrefferedLandmarkTypesAsStrings() {
+		List<String> result= new ArrayList<>();
+		for (LandmarkType type : prefferedLandmarkTypes) {
+			result.add(type.getType());
+		}
+		return result;
 	}
 }

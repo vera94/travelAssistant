@@ -40,14 +40,14 @@ public class LandmarkController {
 	private ILandmarkRepository landmarkRepository;
 	@Autowired
 	private IUserRepository userRepository;
-
-	private DirectionsService directionService = new DirectionsService("");
+	@Autowired
+	private DirectionsService directionService;
 
 	@GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Iterable<Landmark> getAllLandmarks(HttpServletRequest httpServletRequest) throws IOException {
 		String email = httpServletRequest.getAttribute("email").toString();
 		UserEntity userEntity = userRepository.fingByEmail(email);
-		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypes());
+		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypesAsStrings());
 		for (Landmark landmark : landmarks) {
 			if (landmark.getPhotoUrl() != null && !landmark.getPhotoUrl().isEmpty()) {
 				File photo = new File(landmark.getPhotoUrl());

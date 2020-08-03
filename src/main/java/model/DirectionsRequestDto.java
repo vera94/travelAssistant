@@ -1,5 +1,9 @@
 package model;
 
+import java.util.List;
+
+import com.google.maps.DirectionsApiRequest.Waypoint;
+
 public class DirectionsRequestDto {
 	private String origin;
 	private String destination;
@@ -8,6 +12,7 @@ public class DirectionsRequestDto {
 	private int hotelStays;
 	private String email;
 	private int maxDeviationFromPath;
+	private List<Float[]> waypoints;
 	
 	public String getOrigin() {
 		return origin;
@@ -50,5 +55,11 @@ public class DirectionsRequestDto {
 	}
 	public void setMaxDeviationFromPath(int maxDeviationFromPath) {
 		this.maxDeviationFromPath = maxDeviationFromPath;
+	}
+	public List<Float[]> getWaypoints() {
+		return waypoints;
+	}
+	public void setWaypoints(List<Float[]> waypoints) {
+		this.waypoints = waypoints;
 	}
 }

@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.google.maps.DirectionsApiRequest.Waypoint;
 import com.google.maps.errors.ApiException;
@@ -22,36 +24,41 @@ import com.google.maps.model.PlacesSearchResult;
 import model.DirectionsRequestDto;
 import model.Landmark;
 import model.LandmarkType;
-import repository.ILandmarkRepository;;
-
+import model.UserEntity;
+import repository.ILandmarkRepository;
+import repository.IUserRepository;;
+@Service
 public class DirectionsService {
 	@Autowired 
 	private ILandmarkRepository landmarkRepository;
+	
+	@Autowired 
+	private IUserRepository userRepository;
+	
+	@Value("${gmapKey}")
 	private String apiKey;
-	
-	public DirectionsService(){
-	}
-	
-	public DirectionsService(String key){
-		this.apiKey = key;				
-	}
 	
 	public List<PlaceType> getGmapTypes(){
 		return Arrays.asList(PlaceType.values());
 	}
 	
-	public DirectionsResult getDirections(DirectionsRequestDto request) throws ApiException, InterruptedException, IOException {
+	public DirectionsRequestDto getDirections(DirectionsRequestDto request) throws ApiException, InterruptedException, IOException {
 		GMapsClient client = new GMapsClient(apiKey);
 		DirectionsResult directions = client.getDirections(request, null);
-		Iterable<Landmark> allLandmarks = landmarkRepository.findAll();
+		UserEntity userEntity = userRepository.fingByEmail(request.getEmail());
+		Iterable<Landmark> allLandmarks = landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypesAsStrings());
 		EncodedPolyline path = directions.routes[0].overviewPolyline;
-		List<Waypoint> waypoints = extractLandmarkWaypoints(request, allLandmarks, path);
-		DirectionsResult directionsResultWithoutHotels = client.getDirections(request, (Waypoint[]) waypoints.toArray());
+		List<Float[]> wayptsResult = new ArrayList<>();
+		List<Waypoint> waypoints = extractLandmarkWaypoints(request, allLandmarks, path, wayptsResult);
+		Waypoint[] array = new Waypoint[waypoints.size()];
+		array = waypoints.toArray(array);
+		DirectionsResult directionsResultWithoutHotels = client.getDirections(request, array);
 		List<Waypoint> hotelWaypoints = findHotels(client, directionsResultWithoutHotels, request.getHotelStays());
 		waypoints.addAll(hotelWaypoints);
-		DirectionsResult directionsResultWithHotels = client.getDirections(request, (Waypoint[]) waypoints.toArray());
-		return directionsResultWithHotels;
-		
+		DirectionsResult directionsResultWithHotels = client.getDirections(request, array);
+		request.setWaypoints(wayptsResult );
+		//return directionsResultWithHotels;
+		return request;
 	}
 
 	public List<Landmark> findAllPlaces(Collection<LandmarkType> collection) {
@@ -83,40 +90,42 @@ public class DirectionsService {
 	
 	private List<Waypoint> findHotels(GMapsClient client, DirectionsResult directionsResult, int hotelStays) throws ApiException, InterruptedException, IOException {
 		List<Waypoint> hotels = new ArrayList<>();
-		DirectionsLeg[] directionsLegs = directionsResult.routes[0].legs;
-		long length = 0;
+		if (hotelStays > 0) {
+			DirectionsLeg[] directionsLegs = directionsResult.routes[0].legs;
+			long length = 0;
 //		long duration = 0;
-		for (DirectionsLeg directionsLeg : directionsLegs) {
-			length += directionsLeg.distance.inMeters;
+			for (DirectionsLeg directionsLeg : directionsLegs) {
+				length += directionsLeg.distance.inMeters;
 //			duration += directionsLeg.duration.inSeconds / 60; //minutes
-		}
-		long pathForStay = length/hotelStays;
-		int distanceTmp= 0;
-		for (DirectionsLeg directionsLeg : directionsLegs) {
-			if((distanceTmp + directionsLeg.distance.inMeters) < pathForStay) {
-				distanceTmp += directionsLeg.distance.inMeters;
-				continue;
-			} 
-			
-			for(DirectionsStep step : directionsLeg.steps) {
-				if ((distanceTmp + step.distance.inMeters) < pathForStay) {
+			}
+			long pathForStay = length / hotelStays;
+			int distanceTmp = 0;
+			for (DirectionsLeg directionsLeg : directionsLegs) {
+				if ((distanceTmp + directionsLeg.distance.inMeters) < pathForStay) {
 					distanceTmp += directionsLeg.distance.inMeters;
 					continue;
-				} else {
-					LatLng startLocation = step.startLocation;
-					//findnearestHotel on this location; add to waypoints
-					String hotelPlaceId = client.findHotelNearby(startLocation);
-					Waypoint waypoint = new Waypoint(hotelPlaceId);
-					hotels.add(waypoint);
-					pathForStay += length/hotelStays;
-					distanceTmp += directionsLeg.distance.inMeters;
+				}
+
+				for (DirectionsStep step : directionsLeg.steps) {
+					if ((distanceTmp + step.distance.inMeters) < pathForStay) {
+						distanceTmp += directionsLeg.distance.inMeters;
+						continue;
+					} else {
+						LatLng startLocation = step.startLocation;
+						// findnearestHotel on this location; add to waypoints
+						String hotelPlaceId = client.findHotelNearby(startLocation);
+						Waypoint waypoint = new Waypoint(hotelPlaceId);
+						hotels.add(waypoint);
+						pathForStay += length / hotelStays;
+						distanceTmp += directionsLeg.distance.inMeters;
+					}
 				}
 			}
 		}
 		return hotels;
 	}
 
-	private List<Waypoint> extractLandmarkWaypoints(DirectionsRequestDto request, Iterable<Landmark> allLandmarks, EncodedPolyline path) {
+	private List<Waypoint> extractLandmarkWaypoints(DirectionsRequestDto request, Iterable<Landmark> allLandmarks, EncodedPolyline path, List<Float[]> wayptsResult) {
 		List<Waypoint> waypoints = new ArrayList<>();
 		List<Landmark> nearByLandmarks = new ArrayList<>();
 		List<LatLng> decodePath = path.decodePath();
@@ -141,6 +150,8 @@ public class DirectionsService {
 				break;
 			}
 			Waypoint waypoint = new Waypoint(new LatLng(landmark.getLat(), landmark.getLng()));
+			Float[] e = {landmark.getLat(), landmark.getLng()};
+			wayptsResult.add(e );
 			waypoints.add(waypoint);
 			waypointsCount--;
 		}
