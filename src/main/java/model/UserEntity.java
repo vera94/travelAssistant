@@ -13,6 +13,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 @Entity
 public class UserEntity {
 	@Id
@@ -28,6 +31,10 @@ public class UserEntity {
 
 	@ElementCollection()
 	private Collection<LandmarkType> prefferedLandmarkTypes = new ArrayList<>();
+	
+	@ElementCollection()
+	@Cascade({CascadeType.ALL})
+	private Collection<DirectionsRequest> savedRequests = new ArrayList<>();
 	
 	public UserEntity() {
 	}
@@ -103,5 +110,15 @@ public class UserEntity {
 			result.add(type.getType());
 		}
 		return result;
+	}
+
+
+	public Collection<DirectionsRequest> getSavedRequests() {
+		return savedRequests;
+	}
+
+
+	public void setSavedRequests(Collection<DirectionsRequest> savedRequests) {
+		this.savedRequests = savedRequests;
 	}
 }

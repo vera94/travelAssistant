@@ -21,10 +21,11 @@ import com.google.maps.model.LatLng;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResult;
 
-import model.DirectionsRequestDto;
+import model.DirectionsRequest;
 import model.Landmark;
 import model.LandmarkType;
 import model.UserEntity;
+import repository.IDirectionsRequestRepository;
 import repository.ILandmarkRepository;
 import repository.IUserRepository;;
 @Service
@@ -35,6 +36,9 @@ public class DirectionsService {
 	@Autowired 
 	private IUserRepository userRepository;
 	
+	@Autowired 
+	private IDirectionsRequestRepository requestRepository;
+	
 	@Value("${gmapKey}")
 	private String apiKey;
 	
@@ -42,7 +46,7 @@ public class DirectionsService {
 		return Arrays.asList(PlaceType.values());
 	}
 	
-	public DirectionsRequestDto getDirections(DirectionsRequestDto request) throws ApiException, InterruptedException, IOException {
+	public DirectionsRequest getDirections(DirectionsRequest request) throws ApiException, InterruptedException, IOException {
 		GMapsClient client = new GMapsClient(apiKey);
 		DirectionsResult directions = client.getDirections(request, null);
 		UserEntity userEntity = userRepository.fingByEmail(request.getEmail());
@@ -125,7 +129,7 @@ public class DirectionsService {
 		return hotels;
 	}
 
-	private List<Waypoint> extractLandmarkWaypoints(DirectionsRequestDto request, Iterable<Landmark> allLandmarks, EncodedPolyline path, List<Float[]> wayptsResult) {
+	private List<Waypoint> extractLandmarkWaypoints(DirectionsRequest request, Iterable<Landmark> allLandmarks, EncodedPolyline path, List<Float[]> wayptsResult) {
 		List<Waypoint> waypoints = new ArrayList<>();
 		List<Landmark> nearByLandmarks = new ArrayList<>();
 		List<LatLng> decodePath = path.decodePath();
@@ -175,5 +179,17 @@ public class DirectionsService {
 	private double rad2deg(double rad) {
 		  return (rad * 180.0 / Math.PI);
 		}
+
+	public void saveRequest(DirectionsRequest request, String userEmail) {
+		UserEntity userEntity = userRepository.fingByEmail(userEmail);
+		userEntity.getSavedRequests().add(request);
+		requestRepository.save(request);
+		userRepository.save(userEntity);
+	}
+	
+	public Collection<DirectionsRequest> getRequests(String userEmail) {
+		UserEntity userEntity = userRepository.fingByEmail(userEmail);
+		return userEntity.getSavedRequests();
+	}
 
 }

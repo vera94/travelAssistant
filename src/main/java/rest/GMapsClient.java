@@ -19,7 +19,7 @@ import com.google.maps.model.PlacesSearchResult;
 import com.google.maps.model.RankBy;
 import com.google.maps.model.TravelMode;
 
-import model.DirectionsRequestDto;;
+import model.DirectionsRequest;;
 
 public class GMapsClient {
 	private GeoApiContext context;
@@ -28,7 +28,7 @@ public class GMapsClient {
 	}
 
 
-	public DirectionsResult getDirections(DirectionsRequestDto request, Waypoint[] waypoints) throws ApiException, InterruptedException, IOException {
+	public DirectionsResult getDirections(DirectionsRequest request, Waypoint[] waypoints) throws ApiException, InterruptedException, IOException {
 		DirectionsApiRequest directionsRequest = DirectionsApi.getDirections(context, "place_id:" + request.getOrigin(), "place_id:" +request.getDestination());
 		directionsRequest.mode(TravelMode.valueOf(request.getTravelMode()));
 		if (waypoints != null && waypoints.length > 0) {
