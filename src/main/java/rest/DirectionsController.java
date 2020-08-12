@@ -4,14 +4,18 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.maps.errors.ApiException;
 
 import model.DirectionsRequest;
+import model.Landmark;
 
 @Controller    
 @RequestMapping(path="/directions") 
@@ -70,5 +75,11 @@ public class DirectionsController {
 		return null;
 	}
 	
-	
+	@CrossOrigin(origins = "*")
+	@DeleteMapping(path = "/request/{requestId}")
+	public ResponseEntity<Object> deleteRequest(@PathVariable("requestId") long requestId, HttpServletRequest httpServletRequest) {
+		String email = httpServletRequest.getAttribute("email").toString();
+		directionsService.delete(requestId, email);
+		return ResponseEntity.ok().build();
+	}
 }

@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+
+import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -182,6 +185,7 @@ public class DirectionsService {
 
 	public void saveRequest(DirectionsRequest request, String userEmail) {
 		UserEntity userEntity = userRepository.fingByEmail(userEmail);
+		request.setId(null);
 		userEntity.getSavedRequests().add(request);
 		requestRepository.save(request);
 		userRepository.save(userEntity);
@@ -190,6 +194,17 @@ public class DirectionsService {
 	public Collection<DirectionsRequest> getRequests(String userEmail) {
 		UserEntity userEntity = userRepository.fingByEmail(userEmail);
 		return userEntity.getSavedRequests();
+	}
+
+	public void delete(long requestId, String userEmail) {
+		UserEntity userEntity = userRepository.fingByEmail(userEmail);
+		DirectionsRequest request = requestRepository.findById(requestId).get();
+		if (request == null) {
+			throw new EntityNotFoundException("Could not find object with id :" + requestId);
+		}
+		userEntity.getSavedRequests().remove(request);
+		userRepository.save(userEntity);
+		requestRepository.delete(request);
 	}
 
 }
