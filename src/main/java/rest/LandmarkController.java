@@ -3,6 +3,7 @@ package rest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +28,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import model.Landmark;
+import model.LandmarkType;
 import model.UserEntity;
 import repository.ILandmarkRepository;
+import repository.ILandmarkTypeRepository;
 import repository.IUserRepository;
 
 @Controller    
@@ -38,23 +41,38 @@ public class LandmarkController {
 	ServletContext context;
 	@Autowired
 	private ILandmarkRepository landmarkRepository;
+	
+	@Autowired
+	private ILandmarkTypeRepository landmarkTypeRepository;
 	@Autowired
 	private IUserRepository userRepository;
 	@Autowired
 	private DirectionsService directionService;
-
+	
+	@GetMapping(path = "/home")
+	public @ResponseBody String getGreeting() {
+		return "HELLO WORLD";
+	}
+	
 	@GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Iterable<Landmark> getAllLandmarks(HttpServletRequest httpServletRequest) throws IOException {
 		String email = httpServletRequest.getAttribute("email").toString();
 		UserEntity userEntity = userRepository.fingByEmail(email);
-		List<Landmark> landmarks = (List<Landmark>) landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypesAsStrings());
+		List<Landmark> landmarks = new ArrayList<>();
+		List<Landmark> allPlacesFromMapsApi = new ArrayList<>();
+		if (userEntity.getPrefferedLandmarkTypesAsStrings() != null && !userEntity.getPrefferedLandmarkTypesAsStrings().isEmpty()) {
+			landmarks = (List<Landmark>) landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypesAsStrings());
+			allPlacesFromMapsApi = directionService.findAllPlaces(userEntity.getPrefferedLandmarkTypes());
+		} else {
+			landmarks = (List<Landmark>) landmarkRepository.findAll();
+			allPlacesFromMapsApi = directionService.findAllPlaces((List<LandmarkType>) landmarkTypeRepository.getAllTypes());
+		}
 		for (Landmark landmark : landmarks) {
 			if (landmark.getPhotoUrl() != null && !landmark.getPhotoUrl().isEmpty()) {
 				File photo = new File(landmark.getPhotoUrl());
 				landmark.setPhoto(Files.readAllBytes(photo.toPath()));
 			}
 		}
-		List<Landmark> allPlacesFromMapsApi = directionService.findAllPlaces(userEntity.getPrefferedLandmarkTypes());
 		landmarks.addAll(allPlacesFromMapsApi);
 		return landmarks;
 	}

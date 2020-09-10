@@ -41,6 +41,7 @@ public class DirectionsController {
 			String email = httpServletRequest.getAttribute("email").toString();
 			request.setEmail(email);
 		try {
+			validateRequest(request);
 			return directionsService.getDirections(request);
 		} catch (ApiException | InterruptedException | IOException e) {
 			// TODO Auto-generated catch block
@@ -49,6 +50,18 @@ public class DirectionsController {
 		return null;
 	}
 	
+	private void validateRequest(DirectionsRequest request) {
+		if(request.getDestination() == null || request.getDestination().isEmpty()) {
+			throw new IllegalArgumentException("Destination can not be empty");
+		}
+		if(request.getOrigin() == null || request.getOrigin().isEmpty()) {
+			throw new IllegalArgumentException("Origin can not be empty");
+		}
+		if(request.getHotelStays() < 0) {
+			throw new IllegalArgumentException("Hotel stays property must be a positive number");
+		}
+	}
+
 	@CrossOrigin(origins = "*")
 	@PostMapping(path="/request")
 	public ResponseEntity<Object>  saveRequest(@RequestBody DirectionsRequest request, HttpServletRequest httpServletRequest) {

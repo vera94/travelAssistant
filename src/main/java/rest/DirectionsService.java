@@ -53,18 +53,22 @@ public class DirectionsService {
 		GMapsClient client = new GMapsClient(apiKey);
 		DirectionsResult directions = client.getDirections(request, null);
 		UserEntity userEntity = userRepository.fingByEmail(request.getEmail());
-		Iterable<Landmark> allLandmarks = landmarkRepository.getAllLandmarksByType(userEntity.getPrefferedLandmarkTypesAsStrings());
+		Collection<String> prefferedLandmarkTypesAsStrings = userEntity.getPrefferedLandmarkTypesAsStrings();
+		Iterable<Landmark> allLandmarks = new ArrayList<>();
+		if (prefferedLandmarkTypesAsStrings.isEmpty()) {
+			allLandmarks = landmarkRepository.findAll();
+		} else {
+			allLandmarks = landmarkRepository.getAllLandmarksByType(prefferedLandmarkTypesAsStrings);
+		}
 		EncodedPolyline path = directions.routes[0].overviewPolyline;
 		List<Float[]> wayptsResult = new ArrayList<>();
-		List<Waypoint> waypoints = extractLandmarkWaypoints(request, allLandmarks, path, wayptsResult);
+		List<Waypoint> waypoints = extractLandmarkWaypoints(request, allLandmarks, path, wayptsResult, client, userEntity.getPrefferedLandmarkTypes());
 		Waypoint[] array = new Waypoint[waypoints.size()];
 		array = waypoints.toArray(array);
 		DirectionsResult directionsResultWithoutHotels = client.getDirections(request, array);
-		List<Waypoint> hotelWaypoints = findHotels(client, directionsResultWithoutHotels, request.getHotelStays());
-		waypoints.addAll(hotelWaypoints);
-		DirectionsResult directionsResultWithHotels = client.getDirections(request, array);
+		List<Float[]> hotelWaypoints = findHotels(client, directionsResultWithoutHotels, request.getHotelStays());
+		wayptsResult.addAll(hotelWaypoints);
 		request.setWaypoints(wayptsResult );
-		//return directionsResultWithHotels;
 		return request;
 	}
 
@@ -76,7 +80,7 @@ public class DirectionsService {
 			if (gmapPlaceTypeString != null && !gmapPlaceTypeString.isEmpty()) {
 				try {
 					PlaceType placeType = PlaceType.valueOf(landmarkType.getGmapMapping());
-					List<PlacesSearchResult> findPlaces = client.findPlaces(placeType, null);
+					List<PlacesSearchResult> findPlaces = client.findPlaces(placeType, null, 0);
 					for (PlacesSearchResult placesSearchResult : findPlaces) {
 						Landmark landmark = new Landmark();
 						LatLng latLng = placesSearchResult.geometry.location;
@@ -95,15 +99,13 @@ public class DirectionsService {
 		return results;
 	}
 	
-	private List<Waypoint> findHotels(GMapsClient client, DirectionsResult directionsResult, int hotelStays) throws ApiException, InterruptedException, IOException {
-		List<Waypoint> hotels = new ArrayList<>();
+	private List<Float[]> findHotels(GMapsClient client, DirectionsResult directionsResult, int hotelStays) throws ApiException, InterruptedException, IOException {
+		List<Float[]> hotels = new ArrayList<>();
 		if (hotelStays > 0) {
 			DirectionsLeg[] directionsLegs = directionsResult.routes[0].legs;
 			long length = 0;
-//		long duration = 0;
 			for (DirectionsLeg directionsLeg : directionsLegs) {
 				length += directionsLeg.distance.inMeters;
-//			duration += directionsLeg.duration.inSeconds / 60; //minutes
 			}
 			long pathForStay = length / hotelStays;
 			int distanceTmp = 0;
@@ -115,16 +117,20 @@ public class DirectionsService {
 
 				for (DirectionsStep step : directionsLeg.steps) {
 					if ((distanceTmp + step.distance.inMeters) < pathForStay) {
-						distanceTmp += directionsLeg.distance.inMeters;
+						System.out.println("distanceTmp : " + distanceTmp +"  stemeters : " + step.distance.inMeters);
+						distanceTmp += step.distance.inMeters;
 						continue;
 					} else {
 						LatLng startLocation = step.startLocation;
 						// findnearestHotel on this location; add to waypoints
-						String hotelPlaceId = client.findHotelNearby(startLocation);
-						Waypoint waypoint = new Waypoint(hotelPlaceId);
-						hotels.add(waypoint);
+						LatLng hotelPlaceId = client.findHotelNearby(startLocation);
+						Float[] e = {(float) hotelPlaceId.lat, (float) hotelPlaceId.lng};
+						hotels.add(e);
+						if(hotels.size() == hotelStays) {
+							return hotels;
+						}
 						pathForStay += length / hotelStays;
-						distanceTmp += directionsLeg.distance.inMeters;
+						distanceTmp += step.distance.inMeters;
 					}
 				}
 			}
@@ -132,11 +138,17 @@ public class DirectionsService {
 		return hotels;
 	}
 
-	private List<Waypoint> extractLandmarkWaypoints(DirectionsRequest request, Iterable<Landmark> allLandmarks, EncodedPolyline path, List<Float[]> wayptsResult) {
+	private List<Waypoint> extractLandmarkWaypoints(DirectionsRequest request, Iterable<Landmark> allLandmarks, 
+			EncodedPolyline path, List<Float[]> wayptsResult, GMapsClient client, Collection<LandmarkType> preferedTypes) {
 		List<Waypoint> waypoints = new ArrayList<>();
 		List<Landmark> nearByLandmarks = new ArrayList<>();
 		List<LatLng> decodePath = path.decodePath();
+		List<String> gmapPrefferedTypes = extractGmapPrefferedTypes(preferedTypes);
+		LatLng lastFoundPlace = null;
 		for (LatLng latLng : decodePath) {
+			if(lastFoundPlace == null) {
+				lastFoundPlace = latLng;
+			}
 			Iterator<Landmark> iterator = allLandmarks.iterator();
 			while (iterator.hasNext()) {
 				Landmark landmark = iterator.next();
@@ -144,6 +156,30 @@ public class DirectionsService {
 				if(distance <= request.getMaxDeviationFromPath()) {
 					nearByLandmarks.add(landmark);
 					iterator.remove();
+				}
+			}
+			double distance = distance(lastFoundPlace.lat, lastFoundPlace.lng, latLng.lat, latLng.lng);
+			if(distance > request.getMaxDeviationFromPath()) {
+				lastFoundPlace = latLng;
+				for (String gmapType : gmapPrefferedTypes) {
+					try {
+						lastFoundPlace = latLng;
+						List<PlacesSearchResult> findPlaces = client.findPlaces(PlaceType.valueOf(gmapType), latLng, request.getMaxDeviationFromPath()*1000);
+						for (PlacesSearchResult place : findPlaces) {
+							Landmark landmark = new Landmark();
+							LatLng placeLatLng = place.geometry.location;
+							landmark.setLat((float) placeLatLng.lat);
+							landmark.setLng((float) placeLatLng.lng);
+							landmark.setName(place.name);
+							landmark.setRating(place.rating);
+							if(!nearByLandmarks.contains(landmark)) {
+								nearByLandmarks.add(landmark);
+							}
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
 				}
 			}
 		}
@@ -158,12 +194,23 @@ public class DirectionsService {
 			}
 			Waypoint waypoint = new Waypoint(new LatLng(landmark.getLat(), landmark.getLng()));
 			Float[] e = {landmark.getLat(), landmark.getLng()};
-			wayptsResult.add(e );
+			wayptsResult.add(e);
 			waypoints.add(waypoint);
 			waypointsCount--;
 		}
 		
 		return waypoints;
+	}
+
+	private List<String> extractGmapPrefferedTypes(Collection<LandmarkType> preferedTypes) {
+		List<String> gmapTypes = new ArrayList<>();
+		for (LandmarkType landmarkType : preferedTypes) {
+			String gmapMapping = landmarkType.getGmapMapping();
+			if(gmapMapping != null && !gmapMapping.isEmpty()) {
+				gmapTypes.add(gmapMapping);
+			}
+		}
+		return gmapTypes;
 	}
 
 	private double distance(double lat1, double lon1, double lat2, double lon2) {

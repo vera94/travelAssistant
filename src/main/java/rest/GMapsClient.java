@@ -39,18 +39,22 @@ public class GMapsClient {
 		return result;
 	}
 	
-	public String findHotelNearby(LatLng place) throws ApiException, InterruptedException, IOException {
+	public LatLng findHotelNearby(LatLng place) throws ApiException, InterruptedException, IOException {
 		NearbySearchRequest nearbySearchQuery = PlacesApi.nearbySearchQuery(context, place);
 		nearbySearchQuery.keyword("hotel"); //bg
 		nearbySearchQuery.rankby(RankBy.DISTANCE);
 		PlacesSearchResponse searchResponse = nearbySearchQuery.await();
-		return searchResponse.results[0].placeId;
+		return searchResponse.results[0].geometry.location;
 	}
 	
-	public List<PlacesSearchResult> findPlaces(PlaceType placeType, LatLng place) throws ApiException, InterruptedException, IOException {
+	public List<PlacesSearchResult> findPlaces(PlaceType placeType, LatLng place, int distance) throws ApiException, InterruptedException, IOException {
 		NearbySearchRequest nearbySearchQuery = PlacesApi.nearbySearchQuery(context, new LatLng(42.698334, 23.319941));
 		nearbySearchQuery.type(placeType);
-		nearbySearchQuery.rankby(RankBy.DISTANCE);
+		if (distance > 0) {
+			nearbySearchQuery.radius(distance);
+		} else {
+			nearbySearchQuery.rankby(RankBy.DISTANCE);
+		}
 		List<PlacesSearchResult> places = new ArrayList<>();
 		PlacesSearchResponse searchResponse = null;
 		searchResponse = nearbySearchQuery.await();

@@ -36,7 +36,7 @@ public class Application extends SpringBootServletInitializer {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("http://localhost:4200");
+				registry.addMapping("/**").allowedOrigins("http://localhost:4200", "https://travel-assistat-1558797246660.ey.r.appspot.com/" );
 			}
 		};
 	}

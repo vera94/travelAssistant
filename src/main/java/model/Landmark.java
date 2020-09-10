@@ -108,6 +108,22 @@ public class Landmark implements Comparable<Landmark>{
 	
 	@Override
 	public int compareTo(Landmark other) {
-        return rating < other.rating? -1 : rating > other.rating ? 1 : 0;
+        return rating < other.rating? 1 : rating > other.rating ? -1 : 0;
     }
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Landmark other = (Landmark) obj;
+		if (Float.floatToIntBits(lat) != Float.floatToIntBits(other.lat))
+			return false;
+		if (Float.floatToIntBits(lng) != Float.floatToIntBits(other.lng))
+			return false;
+		return true;
+	}
 }
